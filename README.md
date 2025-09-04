@@ -116,8 +116,8 @@ sudo zypper install -y gcc-c++ cmake make \
 ### **2) Configure & Build**
 
 ```
-git clone https://github.com/yourname/wxgl-overlay-demo.git
-cd wxgl-overlay-demo
+git clone https://github.com/07c2/wxwidgets-opengl-demo.git
+cd wxwidgets-opengl-demo
 
 cmake -B build -S .
 cmake --build build -j
@@ -126,7 +126,7 @@ cmake --build build -j
 ### **3) Run**
 
 ```
-./build/wxgl_overlay_demo
+./build/wxwidgets_opengl_demo
 ```
 
 > After build, CMake copies resources/ into the executable directory for direct run.
@@ -141,7 +141,7 @@ cmake --build build -j
 brew install wxwidgets cmake
 cmake -B build -S .
 cmake --build build -j
-./build/wxgl_overlay_demo.app/Contents/MacOS/wxgl_overlay_demo
+./build/wxgl_overlay_demo.app/Contents/MacOS/wxwidgets_opengl_demo
 ```
 
 - macOS OpenGL is “deprecated” but still usable. Works fine on wxWidgets 3.2+. If wx-config isn’t found, add Homebrew prefix to PATH or use -DWXGL_WX_CONFIG=/opt/homebrew/bin/wx-config.
@@ -152,7 +152,7 @@ pacman -S --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake \
     mingw-w64-x86_64-wxWidgets
 cmake -B build -S . -G "MinGW Makefiles"
 cmake --build build -j
-build\wxgl_overlay_demo.exe
+build\wxwidgets_opengl_demo.exe
 ```
 
 - **Windows (vcpkg, optional)**
