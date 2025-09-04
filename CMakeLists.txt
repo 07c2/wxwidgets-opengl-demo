@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(wxgl_overlay_demo
+project(wxwidgets_opengl_demo
     VERSION 0.1.0
     DESCRIPTION "wxWidgets + OpenGL interactive overlay demo"
     LANGUAGES C CXX)
@@ -48,7 +48,7 @@ set(RENDER_SOURCES
     src/render/GlCheck.h
 )
 
-add_executable(wxgl_overlay_demo
+add_executable(wxwidgets_opengl_demo
     ${APP_SOURCES}
     ${RENDER_SOURCES}
 )
@@ -58,7 +58,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES
     ${APP_SOURCES} ${RENDER_SOURCES})
 
 # Include paths for headers within this repo (e.g., stb)
-target_include_directories(wxgl_overlay_demo
+target_include_directories(wxwidgets_opengl_demo
     PRIVATE
         src
         third_party/stb
@@ -67,18 +67,18 @@ target_include_directories(wxgl_overlay_demo
 # Platform-specific tweaks
 if(APPLE)
     # Silence deprecated OpenGL warnings on macOS (OpenGL remains usable)
-    target_compile_definitions(wxgl_overlay_demo PRIVATE GL_SILENCE_DEPRECATION=1)
+    target_compile_definitions(wxwidgets_opengl_demo PRIVATE GL_SILENCE_DEPRECATION=1)
 endif()
 
 # Warnings (kept moderate to be toolchain-friendly)
 if(MSVC)
-    target_compile_options(wxgl_overlay_demo PRIVATE /W4 /permissive- /EHsc)
+    target_compile_options(wxwidgets_opengl_demo PRIVATE /W4 /permissive- /EHsc)
 else()
-    target_compile_options(wxgl_overlay_demo PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(wxwidgets_opengl_demo PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
 # Link libraries
-target_link_libraries(wxgl_overlay_demo
+target_link_libraries(wxwidgets_opengl_demo
     PRIVATE
         ${wxWidgets_LIBRARIES}
         OpenGL::GL
@@ -86,11 +86,11 @@ target_link_libraries(wxgl_overlay_demo
 )
 
 # Resource directory available at runtime (optional helper define)
-target_compile_definitions(wxgl_overlay_demo
+target_compile_definitions(wxwidgets_opengl_demo
     PRIVATE APP_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources")
 
 # Copy resources next to the built executable for easy running from build tree
-add_custom_command(TARGET wxgl_overlay_demo POST_BUILD
+add_custom_command(TARGET wxwidgets_opengl_demo POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_CURRENT_SOURCE_DIR}/resources"
-            "$<TARGET_FILE_DIR:wxgl_overlay_demo>/resources")
+            "$<TARGET_FILE_DIR:wxwidgets_opengl_demo>/resources")

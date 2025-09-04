@@ -1,6 +1,7 @@
 // src/render/Renderer.cpp
 #include "Renderer.h"
 
+#include <iostream>
 #include <algorithm>
 #include <cmath>
 
@@ -29,6 +30,10 @@ bool Renderer::Initialize()
     if (!gladLoadGL()) {
         return false;
     }
+    const char* ver = reinterpret_cast<const char*>(glGetString(0x1F02)); // GL_VERSION
+    const char* shv = reinterpret_cast<const char*>(glGetString(0x8B8C)); // GLSL
+    std::cout << "OpenGL: " << (ver ? ver : "?")
+          << " | GLSL: " << (shv ? shv : "?") << std::endl;
 
     ApplyDefaultGLState();
 
@@ -55,6 +60,7 @@ void Renderer::ApplyDefaultGLState()
 {
     // 2D: no depth, enable alpha blending for textured UI
     glDisable(0x0B71 /* GL_DEPTH_TEST */);
+    glDisable(0x0B44 /* GL_CULL_FACE */);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // A neutral dark background

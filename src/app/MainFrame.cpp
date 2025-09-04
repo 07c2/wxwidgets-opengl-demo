@@ -48,7 +48,6 @@ void MainFrame::OnToggleSidebar(wxCommandEvent& /*evt*/)
 
 void MainFrame::ToggleSidebar()
 {
-    wxWindowUpdateLocker lock(this); // avoid flicker while toggling
     m_sideVisible = !m_sideVisible;
     if (m_side) m_side->Show(m_sideVisible);
 
@@ -60,7 +59,8 @@ void MainFrame::ToggleSidebar()
     }
 
     // Notify children about size change to ensure GL viewport is updated.
-    SendSizeEvent(wxSEND_EVENT_POST);
+    SendSizeEvent();
+    Update();
 }
 
 bool MainFrame::IsSidebarVisible() const

@@ -29,7 +29,7 @@ void SidePanel::BuildUi()
 
     // --- Rotation group ---
     auto* rotBox = new wxBoxSizer(wxVERTICAL);
-    m_rotLabel = new wxStaticText(this, wxID_ANY, "Rotation: 0°");
+    m_rotLabel = new wxStaticText(this, wxID_ANY, wxS("Rotation: 0°"));
     m_rotation = new wxSlider(this, wxID_ANY, ROT_INIT, ROT_MIN, ROT_MAX,
                               wxDefaultPosition, wxDefaultSize,
                               wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
@@ -63,22 +63,37 @@ void SidePanel::BuildUi()
 void SidePanel::OnRotationChanged(wxCommandEvent& evt)
 {
     const int deg = evt.GetInt();
-    if (m_rotLabel)
-        m_rotLabel->SetLabel(wxString::Format("Rotation: %d°", deg));
+    if (m_rotLabel) {
+        m_rotLabel->SetLabel(wxString::Format(wxS("Rotation: %d°"), deg));
+        m_rotLabel->Refresh();
+        m_rotLabel->Update();
+    }
 
-    if (m_canvas)
+    if (m_canvas) {
         m_canvas->SetRotation(static_cast<float>(deg));
-
-    if (m_canvas)
         m_canvas->RequestRedraw();
+    }
+
+    this->Refresh();
+    this->Update();
 }
 
 void SidePanel::OnVisibilityToggled(wxCommandEvent& evt)
 {
     const bool visible = evt.IsChecked();
-    if (m_canvas)
+    if (m_canvas) {
         m_canvas->SetObjectVisible(visible);
-
-    if (m_canvas)
         m_canvas->RequestRedraw();
+    }
+    if (m_visible) {
+        m_visible->SetValue(visible);
+        m_visible->Refresh();
+        m_visible->Update();
+    }
+
+    this->Refresh();
+    this->Update();
+    if (wxWindow* top = wxGetTopLevelParent(this)) {
+        top->Update();
+    }
 }

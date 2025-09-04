@@ -59,6 +59,8 @@ void Scene::Render(const RenderState& state)
     // Activate program
     m_shader->Use();
     const unsigned int prog = m_shader->Program();
+    if (!prog)
+        return;
 
     // Build a 2D rotation+scale matrix (column-major for GLSL)
     const float s = (state.scale > 0.f) ? state.scale : 1.f;
@@ -74,7 +76,7 @@ void Scene::Render(const RenderState& state)
     };
 
     const int locMvp = glGetUniformLocation(prog, "uMVP");
-    if (locMvp >= 0) {
+    if (locMvp >= 0 && glad_glUniformMatrix4fv) {
         glUniformMatrix4fv(locMvp, 1, GL_FALSE, mvp);
     }
 
@@ -83,24 +85,34 @@ void Scene::Render(const RenderState& state)
 
     const int locPos   = glGetAttribLocation(prog, "aPos");
     const int locColor = glGetAttribLocation(prog, "aColor");
+    if (locPos < 0 || locColor < 0) {
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        return;
+    }
 
     const GLsizei stride = static_cast<GLsizei>(sizeof(VertexPC));
     const GLvoid* posPtr = reinterpret_cast<const GLvoid*>(offsetof(VertexPC, x));
     const GLvoid* colPtr = reinterpret_cast<const GLvoid*>(offsetof(VertexPC, r));
 
-    if (locPos >= 0) {
+    if (locPos >= 0 && glad_glEnableVertexAttribArray && glad_glVertexAttribPointer) {
         glEnableVertexAttribArray(static_cast<GLuint>(locPos));
         glVertexAttribPointer(static_cast<GLuint>(locPos), 2, GL_FLOAT, GL_FALSE, stride, posPtr);
     }
-    if (locColor >= 0) {
+    if (locColor >= 0 && glad_glEnableVertexAttribArray && glad_glVertexAttribPointer) {
         glEnableVertexAttribArray(static_cast<GLuint>(locColor));
         glVertexAttribPointer(static_cast<GLuint>(locColor), 3, GL_FLOAT, GL_FALSE, stride, colPtr);
     }
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    if (glad_glDrawArrays) {
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+    }
 
-    if (locColor >= 0) glDisableVertexAttribArray(static_cast<GLuint>(locColor));
-    if (locPos   >= 0) glDisableVertexAttribArray(static_cast<GLuint>(locPos));
+    if (locColor >= 0 && glad_glDisableVertexAttribArray) {
+        glDisableVertexAttribArray(static_cast<GLuint>(locColor));
+    }
+    if (locPos >= 0 && glad_glDisableVertexAttribArray) {
+        glDisableVertexAttribArray(static_cast<GLuint>(locPos));
+    }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

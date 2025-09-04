@@ -35,11 +35,7 @@ GLCanvas::GLCanvas(wxWindow* parent, wxWindowID id)
     Bind(wxEVT_PAINT,        &GLCanvas::OnPaint,       this);
     Bind(wxEVT_SIZE,         &GLCanvas::OnSize,        this);
     Bind(wxEVT_LEFT_DOWN,    &GLCanvas::OnLeftDown,    this);
-    Bind(wxEVT_TIMER,        &GLCanvas::OnTimer,       this);
     Bind(wxEVT_ERASE_BACKGROUND, &GLCanvas::OnEraseBackground, this);
-
-    // Smooth refresh; 16 ms ≈ 60 FPS. You can raise this if you prefer redraw-on-demand.
-    m_timer.Start(16, wxTIMER_CONTINUOUS);
 }
 
 GLCanvas::~GLCanvas()
@@ -58,13 +54,16 @@ void GLCanvas::CreateContextIfNeeded()
     if (m_context)
         return;
 
-#if wxCHECK_VERSION(3,1,0)
+#if defined(__WXGTK__) && wxCHECK_VERSION(3,1,0)
     wxGLContextAttrs compat;
     compat.PlatformDefaults().OGLVersion(2, 1).EndList();
     m_context.reset(new wxGLContext(this, nullptr, &compat));
-    if (!m_context) {
-        m_context.reset(new wxGLContext(this)); // 最终回退
-    }
+    if (!m_context) m_context.reset(new wxGLContext(this));
+#elif wxCHECK_VERSION(3,1,0)
+    wxGLContextAttrs compat;
+    compat.PlatformDefaults().OGLVersion(2, 1).EndList(); // macOS 也走 2.1 没问题
+    m_context.reset(new wxGLContext(this, nullptr, &compat));
+    if (!m_context) m_context.reset(new wxGLContext(this));
 #else
     m_context.reset(new wxGLContext(this));
 #endif
@@ -175,20 +174,20 @@ void GLCanvas::OnLeftDown(wxMouseEvent& evt)
     const int y_px    = static_cast<int>(p.y * scale);
 
     if (m_renderer->HitTestOverlay(x_px, y_px, scale)) {
-        // Post a custom event to the frame to toggle the side panel.
         wxCommandEvent e(wxEVT_WXGL_TOGGLE_SIDEBAR);
         e.SetEventObject(this);
+#ifdef __WXGTK__
+        GetParent()->GetEventHandler()->ProcessEvent(e); // 同步
+#else
         wxPostEvent(GetParent(), e);
-    } else {
-        evt.Skip();
+#endif
+        return;
     }
 }
 
 void GLCanvas::OnTimer(wxTimerEvent& /*evt*/)
 {
     // Lightweight periodic refresh. Consider pausing when unfocused if needed.
-    Refresh(false);
-    Update();
 }
 
 void GLCanvas::OnEraseBackground(wxEraseEvent& /*evt*/)
